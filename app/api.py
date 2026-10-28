@@ -2,6 +2,7 @@ from contextlib import asynccontextmanager
 from pathlib import Path
 
 from fastapi import FastAPI, HTTPException
+import traceback
 from fastapi.responses import FileResponse
 from pydantic import BaseModel
 
@@ -39,7 +40,11 @@ def index():
 
 @app.post("/tickets")
 def create_ticket(t: TicketIn):
-    return process_ticket(t.customer, t.subject, t.body)
+    try:
+        return process_ticket(t.customer, t.subject, t.body)
+    except Exception as e:
+        traceback.print_exc()
+        raise HTTPException(500, f"{type(e).__name__}: {e}")
 
 
 @app.get("/tickets")

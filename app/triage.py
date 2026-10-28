@@ -12,7 +12,13 @@ Return ONLY a JSON object with these keys:
 
 
 def triage_ticket(subject: str, body: str) -> dict:
-    result = ask_json(SYSTEM, f"Subject: {subject}\n\nBody:\n{body}", max_tokens=300)
+    result = ask_json(SYSTEM, f"Subject: {subject}\n\nBody:\n{body}", max_tokens=500)
     if result.get("category") not in CATEGORIES:
         result["category"] = "other"
+    if result.get("urgency") not in ("low", "medium", "high"):
+        result["urgency"] = "medium"
+    if result.get("sentiment") not in ("positive", "neutral", "negative", "angry"):
+        result["sentiment"] = "neutral"
+    result.setdefault("needs_human", False)
+    result.setdefault("summary", "")
     return result
