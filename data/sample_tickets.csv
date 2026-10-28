@@ -1,0 +1,9 @@
+subject,body,expected_category,expected_decision
+Can't log in,"I forgot my password and can't get into my account. What do I do?",account_access,auto_resolved
+Where is my order?,"I ordered 3 days ago, how long does standard shipping take?",shipping,auto_resolved
+How to export data,"How do I export all my data as CSV?",how_to,auto_resolved
+Refund please,"I bought the plan 10 days ago and want my money back.",refund,needs_approval
+Charged twice!!,"You charged my card twice this month. This is unacceptable, fix it NOW or I will dispute with my bank.",billing,escalated
+App crashes,"The mobile app crashes every time I open the reports page on Android 14.",bug,needs_approval
+Dark mode,"It would be great if you added a dark mode option.",feature_request,needs_approval
+Total outage,"Our whole team cannot access the dashboard. We are losing sales. URGENT.",bug,escalated

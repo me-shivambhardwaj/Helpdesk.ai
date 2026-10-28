@@ -1,0 +1,8 @@
+.env
+.git
+.vscode
+venv
+__pycache__
+chroma_db
+tickets.db
+eval/results.csv
