@@ -3,7 +3,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-MODEL = os.getenv("GROQ_MODEL", "llama-3.3-70b-versatile")
+MODEL = os.getenv("GROQ_MODEL") or "openai/gpt-oss-20b"
 AUTO_RESOLVE_CONFIDENCE = float(os.getenv("AUTO_RESOLVE_CONFIDENCE", "0.85"))
 MAX_RETRIEVAL_DISTANCE = float(os.getenv("MAX_RETRIEVAL_DISTANCE", "0.65"))
 DB_PATH = "tickets.db"
