@@ -32,3 +32,12 @@ a human for approval.
 ## Tech stack
 Python, FastAPI, Groq (Llama), ChromaDB, SQLite, vanilla JS frontend, Docker
 >>>>>>> 6e0d86915e4f54fa2aa45ca9ae4c7b2a99c5694e
+>>>>>>>
+>>>>>>> ---
+title: HelpDesk AI
+emoji: 🎧
+colorFrom: blue
+colorTo: indigo
+sdk: docker
+app_port: 7860
+---
