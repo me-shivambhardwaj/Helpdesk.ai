@@ -3,71 +3,335 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>HelpDesk AI</title>
+<title>Support Triage Agent</title>
 <style>
-:root{--bg:#f7f7f5;--card:#fff;--text:#1d1d1b;--muted:#6b6b66;--line:#e3e3de;--accent:#2f5bea;
---ok:#1a7f4b;--warn:#b26a00;--bad:#c0392b}
-@media (prefers-color-scheme:dark){:root{--bg:#161615;--card:#212120;--text:#ececE8;--muted:#9a9a93;--line:#34342f;--accent:#7b9bff;
---ok:#4cc38a;--warn:#e0a040;--bad:#ef7b6e}}
+:root{
+  --bg:#f7f7f5;--card:#fff;--text:#1d1d1b;--muted:#6b6b66;--line:#e3e3de;--accent:#2f5bea;
+  --accent-hover:#2448b8;--ok:#1a7f4b;--warn:#b26a00;--bad:#c0392b;--card-border:rgba(0,0,0,0.08);
+}
+@media (prefers-color-scheme:dark){
+  :root{
+    --bg:#161615;--card:#212120;--text:#ecece8;--muted:#9a9a93;--line:#34342f;--accent:#7b9bff;
+    --accent-hover:#9cb4ff;--ok:#4cc38a;--warn:#e0a040;--bad:#ef7b6e;--card-border:rgba(255,255,255,0.08);
+  }
+}
 *{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--text);font:15px/1.5 system-ui,-apple-system,Segoe UI,sans-serif}
-main{max-width:900px;margin:0 auto;padding:24px 16px 64px}
-h1{font-size:22px;margin:0 0 16px}
+body{margin:0;background:var(--bg);color:var(--text);font:15px/1.5 system-ui,-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,sans-serif}
+main{max-width:920px;margin:0 auto;padding:24px 16px 64px}
+header{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:12px}
+h1{font-size:22px;margin:0;font-weight:700}
+.user-menu{display:flex;align-items:center;gap:10px}
+.user-pill{display:inline-flex;align-items:center;gap:6px;font-size:13px;padding:4px 12px;border-radius:99px;background:var(--card);border:1px solid var(--line);color:var(--text);font-weight:500}
 nav{display:flex;gap:8px;margin-bottom:20px;border-bottom:1px solid var(--line)}
-nav button{background:none;border:0;padding:10px 14px;color:var(--muted);font:inherit;cursor:pointer;border-bottom:2px solid transparent}
+nav button{background:none;border:0;padding:10px 14px;color:var(--muted);font:inherit;font-weight:500;cursor:pointer;border-bottom:2px solid transparent;transition:color .15s}
 nav button.on{color:var(--text);border-color:var(--accent)}
 .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-bottom:20px}
-.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:16px;margin-bottom:12px}
-.big{font-size:28px;font-weight:600}.label{color:var(--muted);font-size:13px}
-.row{display:flex;align-items:center;gap:8px;margin:6px 0}.row span:first-child{width:130px;color:var(--muted)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:20px;margin-bottom:16px;box-shadow:0 1px 3px var(--card-border)}
+.big{font-size:30px;font-weight:700}.label{color:var(--muted);font-size:13px;font-weight:500;display:block;margin-bottom:4px}
+.row{display:flex;align-items:center;gap:8px;margin:8px 0}.row span:first-child{width:130px;color:var(--muted)}
 .bar{height:10px;background:var(--accent);border-radius:5px;min-width:4px}
-.tag{display:inline-block;font-size:12px;padding:2px 8px;border-radius:99px;border:1px solid var(--line);margin-right:4px}
-.tag.escalated,.tag.high,.tag.angry{color:var(--bad);border-color:var(--bad)}
-.tag.needs_approval,.tag.medium,.tag.negative{color:var(--warn);border-color:var(--warn)}
-.tag.auto_resolved,.tag.approved{color:var(--ok);border-color:var(--ok)}
-input,textarea{width:100%;padding:10px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--text);font:inherit;margin:4px 0 12px}
+.tag{display:inline-block;font-size:12px;padding:2px 8px;border-radius:99px;border:1px solid var(--line);margin-right:4px;font-weight:500}
+.tag.escalated,.tag.high,.tag.angry{color:var(--bad);border-color:var(--bad);background:rgba(192,57,43,0.08)}
+.tag.needs_approval,.tag.medium,.tag.negative{color:var(--warn);border-color:var(--warn);background:rgba(178,106,0,0.08)}
+.tag.auto_resolved,.tag.approved{color:var(--ok);border-color:var(--ok);background:rgba(26,127,75,0.08)}
+input,textarea{width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--text);font:inherit;margin:4px 0 14px}
+input:focus,textarea:focus{outline:none;border-color:var(--accent)}
 textarea{min-height:110px;resize:vertical}
-button.primary{background:var(--accent);color:#fff;border:0;padding:10px 18px;border-radius:8px;font:inherit;cursor:pointer}
+button.primary{background:var(--accent);color:#fff;border:0;padding:11px 18px;border-radius:8px;font:inherit;font-weight:600;cursor:pointer;transition:background .15s}
+button.primary:hover{background:var(--accent-hover)}
 button.primary:disabled{opacity:.6;cursor:wait}
+button.secondary{background:none;border:1px solid var(--line);color:var(--text);padding:6px 12px;border-radius:6px;font:inherit;font-size:13px;cursor:pointer}
+button.secondary:hover{border-color:var(--muted);background:var(--bg)}
+.full-width{width:100%}
 .muted{color:var(--muted)}.hide{display:none}
-pre{white-space:pre-wrap;font:inherit;margin:8px 0}
+pre{white-space:pre-wrap;font:inherit;margin:8px 0;background:var(--bg);padding:12px;border-radius:8px;border:1px solid var(--line)}
+
+/* Auth Screen Styles */
+.auth-container{max-width:440px;margin:30px auto 0}
+.auth-switch{display:grid;grid-template-columns:1fr 1fr;background:var(--bg);padding:4px;border-radius:10px;border:1px solid var(--line);margin-bottom:20px}
+.auth-switch button{background:none;border:0;padding:10px 14px;border-radius:8px;font:inherit;font-weight:600;cursor:pointer;color:var(--muted);transition:all .15s;display:flex;align-items:center;justify-content:center;gap:6px}
+.auth-switch button.on{background:var(--card);color:var(--accent);box-shadow:0 1px 3px rgba(0,0,0,0.08)}
+.alert{padding:10px 14px;border-radius:8px;margin-bottom:16px;font-size:13px;line-height:1.4}
+.alert-error{background:rgba(192,57,43,0.1);color:var(--bad);border:1px solid var(--bad)}
+.alert-ok{background:rgba(26,127,75,0.1);color:var(--ok);border:1px solid var(--ok)}
+.auth-footer{font-size:13px;color:var(--muted);text-align:center;margin-top:16px;padding-top:14px;border-top:1px solid var(--line)}
+.auth-footer a{color:var(--accent);text-decoration:none;font-weight:600}
+.auth-footer a:hover{text-decoration:underline}
 </style>
 </head>
 <body>
 <main>
-<h1>HelpDesk AI</h1>
-<nav>
-  <button data-tab="metrics" class="on">Metrics</button>
-  <button data-tab="queue">Review queue</button>
-  <button data-tab="new">Submit ticket</button>
-</nav>
-
-<section id="metrics"></section>
-<section id="queue" class="hide"></section>
-<section id="new" class="hide">
-  <div class="card">
-    <label class="label">Customer email</label>
-    <input id="customer" value="test@example.com">
-    <label class="label">Subject</label>
-    <input id="subject">
-    <label class="label">Message</label>
-    <textarea id="body"></textarea>
-    <button class="primary" id="submit">Process ticket</button>
+<header>
+  <h1>Support Ticket Triage Agent</h1>
+  <div id="header-user" class="user-menu hide">
+    <div class="user-pill"><span id="user-display-email"></span></div>
+    <button class="secondary" id="logout-btn">Log out</button>
   </div>
-  <div id="result"></div>
-</section>
+</header>
+
+<!-- Authentication Form View -->
+<div id="auth-view" class="auth-container">
+  <div class="card">
+    <div style="text-align:center;margin-bottom:18px">
+      <h2 style="margin:0 0 6px;font-size:22px" id="auth-title">Sign In</h2>
+      <p class="muted" style="margin:0;font-size:14px" id="auth-subtitle">Sign in or create a new account to use the support agent.</p>
+    </div>
+
+    <!-- Prominent Switcher Tabs -->
+    <div class="auth-switch">
+      <button type="button" id="tab-login" class="on">Sign In</button>
+      <button type="button" id="tab-signup">Create Account</button>
+    </div>
+
+    <div id="auth-alert" class="alert hide"></div>
+
+    <form id="auth-form" onsubmit="return false;">
+      <label class="label" for="auth-email">Email Address</label>
+      <input type="email" id="auth-email" placeholder="name@company.com" autocomplete="email" required>
+
+      <label class="label" for="auth-password" id="label-password">Password</label>
+      <input type="password" id="auth-password" placeholder="Enter your password" autocomplete="current-password" required>
+
+      <div id="confirm-pwd-group" class="hide">
+        <label class="label" for="auth-confirm">Confirm Password</label>
+        <input type="password" id="auth-confirm" placeholder="Re-enter password" autocomplete="new-password">
+      </div>
+
+      <button type="submit" class="primary full-width" id="auth-btn">Sign In</button>
+    </form>
+
+    <div class="auth-footer" id="auth-footer-text">
+      Don't have an account yet? <a href="javascript:void(0)" onclick="setAuthMode('signup')">Create an account here</a>
+    </div>
+  </div>
+</div>
+
+<!-- Main Application View (Protected) -->
+<div id="app-view" class="hide">
+  <nav>
+    <button data-tab="metrics" class="on">Metrics</button>
+    <button data-tab="queue">Review queue</button>
+    <button data-tab="new">Submit ticket</button>
+  </nav>
+
+  <section id="metrics"></section>
+  <section id="queue" class="hide"></section>
+  <section id="new" class="hide">
+    <div class="card">
+      <label class="label">Customer email</label>
+      <input id="customer" placeholder="your@email.com">
+      <label class="label">Subject</label>
+      <input id="subject" placeholder="e.g. How do I reset my password?">
+      <label class="label">Message</label>
+      <textarea id="body" placeholder="Describe the issue or request in detail..."></textarea>
+      <button class="primary" id="submit">Process ticket</button>
+    </div>
+    <div id="result"></div>
+  </section>
+</div>
 </main>
 
 <script>
 const $ = s => document.querySelector(s);
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const tag = v => `<span class="tag ${esc(v)}">${esc(v)}</span>`;
-async function api(path, opts) {
+
+let authToken = localStorage.getItem("support_agent_token") || "";
+let currentUser = null;
+let authMode = "login"; // 'login' or 'signup'
+
+function setAuthAlert(msg, isError = true) {
+  const el = $("#auth-alert");
+  if (!msg) {
+    el.className = "alert hide";
+    el.textContent = "";
+    return;
+  }
+  el.className = isError ? "alert alert-error" : "alert alert-ok";
+  el.textContent = msg;
+}
+
+function setAuthMode(mode) {
+  authMode = mode;
+  setAuthAlert("");
+  if (mode === "login") {
+    $("#tab-login").classList.add("on");
+    $("#tab-signup").classList.remove("on");
+    $("#auth-title").textContent = "Sign In";
+    $("#auth-subtitle").textContent = "Sign in with your email and password to use the agent.";
+    $("#confirm-pwd-group").classList.add("hide");
+    $("#auth-btn").textContent = "Sign In";
+    $("#label-password").textContent = "Password";
+    $("#auth-password").placeholder = "Enter your password";
+    $("#auth-password").autocomplete = "current-password";
+    $("#auth-footer-text").innerHTML = "Don't have an account yet? <a href=\"javascript:void(0)\" onclick=\"setAuthMode('signup')\">Create an account here</a>";
+  } else {
+    $("#tab-login").classList.remove("on");
+    $("#tab-signup").classList.add("on");
+    $("#auth-title").textContent = "Create an Account";
+    $("#auth-subtitle").textContent = "Anyone can register with their email and password to use the agent.";
+    $("#confirm-pwd-group").classList.remove("hide");
+    $("#auth-btn").textContent = "Create Account & Sign In";
+    $("#label-password").textContent = "Create Password (min 6 characters)";
+    $("#auth-password").placeholder = "Create a password (min 6 chars)";
+    $("#auth-password").autocomplete = "new-password";
+    $("#auth-footer-text").innerHTML = "Already have an account? <a href=\"javascript:void(0)\" onclick=\"setAuthMode('login')\">Sign in here</a>";
+  }
+}
+
+$("#tab-login").onclick = () => setAuthMode("login");
+$("#tab-signup").onclick = () => setAuthMode("signup");
+
+async function api(path, opts = {}) {
+  const headers = Object.assign({}, opts.headers || {});
+  if (authToken) {
+    headers["Authorization"] = `Bearer ${authToken}`;
+  }
+  opts.headers = headers;
+  opts.credentials = "include";
+
   const r = await fetch(path, opts);
-  if (!r.ok) throw new Error(await r.text());
+  if (r.status === 401) {
+    onLoggedOut("Session expired. Please sign in again.");
+    throw new Error("Authentication required");
+  }
+  if (!r.ok) {
+    let errText = "Request failed";
+    try {
+      const errJson = await r.json();
+      errText = errJson.detail || JSON.stringify(errJson);
+    } catch {
+      errText = await r.text();
+    }
+    throw new Error(errText);
+  }
   return r.json();
 }
 
+function onLoggedIn(user, token) {
+  currentUser = user;
+  if (token) {
+    authToken = token;
+    localStorage.setItem("support_agent_token", token);
+  }
+  $("#auth-view").classList.add("hide");
+  $("#app-view").classList.remove("hide");
+  $("#header-user").classList.remove("hide");
+  $("#user-display-email").textContent = `👤 ${user.email}`;
+  $("#customer").value = user.email;
+
+  // Load default metrics
+  loadMetrics();
+}
+
+function onLoggedOut(message = "") {
+  currentUser = null;
+  authToken = "";
+  localStorage.removeItem("support_agent_token");
+  $("#app-view").classList.add("hide");
+  $("#header-user").classList.add("hide");
+  $("#auth-view").classList.remove("hide");
+  if (message) {
+    setAuthAlert(message, true);
+  } else {
+    setAuthAlert("");
+  }
+}
+
+$("#logout-btn").onclick = async () => {
+  try {
+    await fetch("/auth/logout", {
+      method: "POST",
+      headers: authToken ? { "Authorization": `Bearer ${authToken}` } : {},
+      credentials: "include"
+    });
+  } catch {}
+  onLoggedOut();
+  setAuthMode("login");
+};
+
+$("#auth-form").onsubmit = async (e) => {
+  e.preventDefault();
+  const email = $("#auth-email").value.trim();
+  const password = $("#auth-password").value;
+  const confirm = $("#auth-confirm").value;
+
+  if (!email || !password) {
+    setAuthAlert("Please provide both email and password.");
+    return;
+  }
+
+  if (password.length < 6) {
+    setAuthAlert("Password must be at least 6 characters long.");
+    return;
+  }
+
+  if (authMode === "signup") {
+    if (!confirm) {
+      setAuthAlert("Please confirm your password.");
+      return;
+    }
+    if (password !== confirm) {
+      setAuthAlert("Passwords do not match.");
+      return;
+    }
+  }
+
+  const btn = $("#auth-btn");
+  btn.disabled = true;
+  btn.textContent = authMode === "signup" ? "Creating account..." : "Signing in...";
+  setAuthAlert("");
+
+  try {
+    const endpoint = authMode === "signup" ? "/auth/signup" : "/auth/login";
+    const res = await fetch(endpoint, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, password }),
+      credentials: "include"
+    });
+
+    const data = await res.json();
+    if (!res.ok) {
+      throw new Error(data.detail || "Authentication failed.");
+    }
+
+    onLoggedIn(data.user, data.token);
+  } catch (err) {
+    setAuthAlert(err.message, true);
+  } finally {
+    btn.disabled = false;
+    btn.textContent = authMode === "signup" ? "Create Account & Sign In" : "Sign In";
+  }
+};
+
+// Check if already authenticated on page load
+async function checkAuthSession() {
+  const path = window.location.pathname.toLowerCase();
+  const params = new URLSearchParams(window.location.search);
+  const initialMode = (path.includes("signup") || path.includes("register") || params.get("mode") === "signup") ? "signup" : "login";
+
+  if (!authToken) {
+    onLoggedOut("");
+    setAuthMode(initialMode);
+    return;
+  }
+
+  try {
+    const res = await api("/auth/me");
+    if (res && res.user) {
+      onLoggedIn(res.user, authToken);
+      return;
+    }
+  } catch (e) {
+    // Auth failed or token expired
+  }
+
+  onLoggedOut("");
+  setAuthMode(initialMode);
+}
+
+// Navigation
 document.querySelectorAll("nav button").forEach(b => b.onclick = () => {
   document.querySelectorAll("nav button").forEach(x => x.classList.toggle("on", x === b));
   ["metrics", "queue", "new"].forEach(id => $("#" + id).classList.toggle("hide", id !== b.dataset.tab));
@@ -76,53 +340,81 @@ document.querySelectorAll("nav button").forEach(b => b.onclick = () => {
 });
 
 function bars(obj) {
-  const max = Math.max(1, ...Object.values(obj));
-  return Object.entries(obj).map(([k, v]) =>
+  const max = Math.max(1, ...Object.values(obj || {}));
+  return Object.entries(obj || {}).map(([k, v]) =>
     `<div class="row"><span>${esc(k)}</span><div class="bar" style="width:${(v / max) * 60}%"></div><span>${v}</span></div>`).join("");
 }
 
 async function loadMetrics() {
-  const m = await api("/metrics");
-  $("#metrics").innerHTML = `
-    <div class="grid">
-      <div class="card"><div class="label">Total tickets</div><div class="big">${m.total}</div></div>
-      <div class="card"><div class="label">Auto-resolved</div><div class="big">${m.auto_resolved_pct}%</div></div>
-      <div class="card"><div class="label">Avg response time</div><div class="big">${m.avg_response_seconds ?? "-"}${m.avg_response_seconds ? "s" : ""}</div></div>
-    </div>
-    <div class="card"><div class="label">By category</div>${bars(m.by_category) || '<p class="muted">No data yet.</p>'}</div>
-    <div class="card"><div class="label">By status</div>${bars(m.by_status) || '<p class="muted">No data yet.</p>'}</div>`;
+  try {
+    const m = await api("/metrics");
+    $("#metrics").innerHTML = `
+      <div class="grid">
+        <div class="card"><div class="label">Total tickets</div><div class="big">${m.total}</div></div>
+        <div class="card"><div class="label">Auto-resolved</div><div class="big">${m.auto_resolved_pct}%</div></div>
+        <div class="card"><div class="label">Avg response time</div><div class="big">${m.avg_response_seconds ?? "-"}${m.avg_response_seconds ? "s" : ""}</div></div>
+      </div>
+      <div class="card"><div class="label">By category</div>${bars(m.by_category) || '<p class="muted">No data yet.</p>'}</div>
+      <div class="card"><div class="label">By status</div>${bars(m.by_status) || '<p class="muted">No data yet.</p>'}</div>`;
+  } catch (e) {
+    $("#metrics").innerHTML = `<div class="card"><p class="muted">Could not load metrics: ${esc(e.message)}</p></div>`;
+  }
 }
 
 async function loadQueue() {
-  const all = await api("/tickets");
-  const pending = all.filter(t => t.status === "needs_approval" || t.status === "escalated");
-  if (!pending.length) { $("#queue").innerHTML = '<p class="muted">Nothing waiting for review.</p>'; return; }
-  $("#queue").innerHTML = pending.map(t => {
-    let sources = []; try { sources = JSON.parse(t.sources || "[]"); } catch {}
-    return `<div class="card">
-      <div>#${t.id} ${tag(t.status)} ${tag(t.category)} ${tag(t.urgency)} ${tag(t.sentiment)}</div>
-      <p><strong>${esc(t.subject)}</strong> <span class="muted">from ${esc(t.customer)}</span></p>
-      <pre>${esc(t.body)}</pre>
-      <p class="muted">Summary: ${esc(t.summary)}<br>Sources: ${esc(sources.join(", ") || "none")}</p>
-      <textarea id="r${t.id}">${esc(t.draft)}</textarea>
-      <button class="primary" data-id="${t.id}">Approve &amp; send</button>
-    </div>`;
-  }).join("");
-  document.querySelectorAll("#queue button[data-id]").forEach(btn => btn.onclick = async () => {
-    const id = btn.dataset.id;
-    await api(`/tickets/${id}/approve`, {method: "POST", headers: {"Content-Type": "application/json"},
-      body: JSON.stringify({final_reply: $("#r" + id).value})});
-    loadQueue();
-  });
+  try {
+    const all = await api("/tickets");
+    const pending = all.filter(t => t.status === "needs_approval" || t.status === "escalated");
+    if (!pending.length) { $("#queue").innerHTML = '<p class="muted">Nothing waiting for review.</p>'; return; }
+    $("#queue").innerHTML = pending.map(t => {
+      let sources = []; try { sources = JSON.parse(t.sources || "[]"); } catch {}
+      return `<div class="card">
+        <div>#${t.id} ${tag(t.status)} ${tag(t.category)} ${tag(t.urgency)} ${tag(t.sentiment)}</div>
+        <p><strong>${esc(t.subject)}</strong> <span class="muted">from ${esc(t.customer)}</span></p>
+        <pre>${esc(t.body)}</pre>
+        <p class="muted">Summary: ${esc(t.summary)}<br>Sources: ${esc(sources.join(", ") || "none")}</p>
+        <textarea id="r${t.id}">${esc(t.draft)}</textarea>
+        <button class="primary" data-id="${t.id}">Approve &amp; send</button>
+      </div>`;
+    }).join("");
+    document.querySelectorAll("#queue button[data-id]").forEach(btn => btn.onclick = async () => {
+      const id = btn.dataset.id;
+      btn.disabled = true;
+      try {
+        await api(`/tickets/${id}/approve`, {
+          method: "POST",
+          headers: {"Content-Type": "application/json"},
+          body: JSON.stringify({final_reply: $("#r" + id).value})
+        });
+        loadQueue();
+      } catch (err) {
+        alert("Error approving ticket: " + err.message);
+        btn.disabled = false;
+      }
+    });
+  } catch (e) {
+    $("#queue").innerHTML = `<div class="card"><p class="muted">Could not load queue: ${esc(e.message)}</p></div>`;
+  }
 }
 
 $("#submit").onclick = async () => {
   const btn = $("#submit");
-  const payload = {customer: $("#customer").value, subject: $("#subject").value, body: $("#body").value};
-  if (!payload.subject || !payload.body) return;
+  const payload = {
+    customer: $("#customer").value.trim() || (currentUser ? currentUser.email : "test@example.com"),
+    subject: $("#subject").value.trim(),
+    body: $("#body").value.trim()
+  };
+  if (!payload.subject || !payload.body) {
+    alert("Please provide both subject and message.");
+    return;
+  }
   btn.disabled = true; btn.textContent = "Processing...";
   try {
-    const r = await api("/tickets", {method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify(payload)});
+    const r = await api("/tickets", {
+      method: "POST",
+      headers: {"Content-Type": "application/json"},
+      body: JSON.stringify(payload)
+    });
     $("#result").innerHTML = `<div class="card">
       <div>Ticket #${r.id} ${tag(r.status)} ${tag(r.category)} ${tag(r.urgency)} ${tag(r.sentiment)}</div>
       <p class="muted">${esc(r.summary)}</p>
@@ -134,7 +426,8 @@ $("#submit").onclick = async () => {
   btn.disabled = false; btn.textContent = "Process ticket";
 };
 
-loadMetrics();
+// Initial auth check
+checkAuthSession();
 </script>
 </body>
 </html>

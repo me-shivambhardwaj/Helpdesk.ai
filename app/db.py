@@ -1,3 +1,4 @@
+import secrets
 import sqlite3
 import time
 from .config import DB_PATH
@@ -13,7 +14,80 @@ def conn():
         category TEXT, urgency TEXT, sentiment TEXT, summary TEXT,
         draft TEXT, confidence REAL, sources TEXT,
         status TEXT, final_reply TEXT)""")
+    c.execute("""CREATE TABLE IF NOT EXISTS users(
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        email TEXT UNIQUE NOT NULL COLLATE NOCASE,
+        password_hash TEXT NOT NULL,
+        created_at REAL NOT NULL)""")
+    c.execute("""CREATE TABLE IF NOT EXISTS sessions(
+        token TEXT PRIMARY KEY,
+        user_id INTEGER NOT NULL,
+        created_at REAL NOT NULL,
+        expires_at REAL NOT NULL,
+        FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE)""")
     return c
+
+
+def create_user(email: str, password_hash: str) -> dict:
+    with conn() as c:
+        cur = c.execute(
+            "INSERT INTO users (email, password_hash, created_at) VALUES (?, ?, ?)",
+            (email.strip().lower(), password_hash, time.time())
+        )
+        return {"id": cur.lastrowid, "email": email.strip().lower()}
+
+
+def get_user_by_email(email: str) -> dict | None:
+    with conn() as c:
+        r = c.execute("SELECT * FROM users WHERE email = ? COLLATE NOCASE", (email.strip().lower(),)).fetchone()
+        return dict(r) if r else None
+
+
+def get_user_by_id(user_id: int) -> dict | None:
+    with conn() as c:
+        r = c.execute("SELECT id, email, created_at FROM users WHERE id = ?", (user_id,)).fetchone()
+        return dict(r) if r else None
+
+
+def create_session(user_id: int, duration_days: int = 7) -> str:
+    token = secrets.token_urlsafe(32)
+    now = time.time()
+    expires_at = now + (duration_days * 86400)
+    with conn() as c:
+        c.execute(
+            "INSERT INTO sessions (token, user_id, created_at, expires_at) VALUES (?, ?, ?, ?)",
+            (token, user_id, now, expires_at)
+        )
+    return token
+
+
+def get_user_by_session(token: str) -> dict | None:
+    if not token:
+        return None
+    now = time.time()
+    with conn() as c:
+        r = c.execute(
+            """
+            SELECT u.id, u.email, u.created_at, s.expires_at
+            FROM sessions s
+            JOIN users u ON s.user_id = u.id
+            WHERE s.token = ?
+            """,
+            (token,)
+        ).fetchone()
+        if not r:
+            return None
+        if r["expires_at"] < now:
+            c.execute("DELETE FROM sessions WHERE token = ?", (token,))
+            return None
+        return {"id": r["id"], "email": r["email"], "created_at": r["created_at"]}
+
+
+def delete_session(token: str):
+    if not token:
+        return
+    with conn() as c:
+        c.execute("DELETE FROM sessions WHERE token = ?", (token,))
 
 
 def insert(t: dict) -> int:

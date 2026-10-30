@@ -21,4 +21,4 @@ def draft_reply(subject: str, body: str, chunks: list) -> dict:
                 "reply": "", "sources": []}
     context = "\n\n".join(f"[{c['source']}]\n{c['text']}" for c in relevant)
     user = f"KNOWLEDGE BASE:\n{context}\n\nTICKET\nSubject: {subject}\n\n{body}"
-    return ask_json(SYSTEM, user, max_tokens=1800)
+    return ask_json(SYSTEM, user, max_tokens=1500)

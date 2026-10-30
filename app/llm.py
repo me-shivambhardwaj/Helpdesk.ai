@@ -14,7 +14,7 @@ def client():
     return _client
 
 
-def ask_json(system: str, user: str, max_tokens: int = 800, retries: int = 4) -> dict:
+def ask_json(system: str, user: str, max_tokens: int = 1500, retries: int = 4) -> dict:
     for attempt in range(retries):
         try:
             resp = client().chat.completions.create(
